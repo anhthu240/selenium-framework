@@ -26,8 +26,10 @@ public class DriverFactory {
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-dev-shm-usage");
             options.addArguments("--window-size=1920,1080");
+            System.out.println("[Driver] Chrome headless on CI");
         } else {
             options.addArguments("--start-maximized");
+            System.out.println("[Driver] Chrome local mode");
         }
 
         WebDriverManager.chromedriver().setup();
@@ -39,6 +41,9 @@ public class DriverFactory {
 
         if (headless) {
             options.addArguments("-headless");
+            System.out.println("[Driver] Firefox headless on CI");
+        } else {
+            System.out.println("[Driver] Firefox local mode");
         }
 
         WebDriverManager.firefoxdriver().setup();
