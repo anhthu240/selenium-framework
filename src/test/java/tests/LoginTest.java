@@ -12,7 +12,7 @@ public class LoginTest extends BaseTest {
     public void testLoginSuccess() {
         LoginPage loginPage = new LoginPage(getDriver());
         InventoryPage inventoryPage = loginPage.login("standard_user", "secret_sauce");
-        Assert.assertTrue(inventoryPage.isLoaded());
+        Assert.assertTrue(false);
     }
 
     @Test
