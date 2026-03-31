@@ -8,6 +8,10 @@ import io.qameta.allure.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import io.qameta.allure.testng.AllureTestNg;
+import org.testng.annotations.Listeners;
+
+@Listeners({AllureTestNg.class})
 public class LoginTest extends BaseTest {
 
     @Test(groups = "smoke")
