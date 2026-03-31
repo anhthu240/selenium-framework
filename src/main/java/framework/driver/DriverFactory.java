@@ -6,16 +6,43 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.net.URL;
 
 public class DriverFactory {
 
     public static WebDriver createDriver(String browser) {
+        String gridUrl = System.getProperty("grid.url");
         boolean isCI = System.getenv("CI") != null;
+
+        if (gridUrl != null && !gridUrl.isBlank()) {
+            return createRemoteDriver(browser, gridUrl);
+        }
 
         return switch (browser.toLowerCase()) {
             case "firefox" -> createFirefoxDriver(isCI);
             default -> createChromeDriver(isCI);
         };
+    }
+
+    private static WebDriver createRemoteDriver(String browser, String gridUrl) {
+        try {
+            return switch (browser.toLowerCase()) {
+                case "firefox" -> {
+                    FirefoxOptions firefoxOptions = new FirefoxOptions();
+                    yield new RemoteWebDriver(new URL(gridUrl), firefoxOptions);
+                }
+                default -> {
+                    ChromeOptions chromeOptions = new ChromeOptions();
+                    chromeOptions.addArguments("--no-sandbox");
+                    chromeOptions.addArguments("--disable-dev-shm-usage");
+                    yield new RemoteWebDriver(new URL(gridUrl), chromeOptions);
+                }
+            };
+        } catch (Exception e) {
+            throw new RuntimeException("Không kết nối được Selenium Grid: " + gridUrl, e);
+        }
     }
 
     private static WebDriver createChromeDriver(boolean headless) {

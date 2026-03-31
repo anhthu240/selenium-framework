@@ -1,5 +1,7 @@
 package framework.base;
-
+import io.qameta.allure.Attachment;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import framework.config.ConfigReader;
 import framework.driver.DriverFactory;
 import framework.utils.ScreenshotUtil;
@@ -33,12 +35,16 @@ public abstract class BaseTest {
     @AfterMethod(alwaysRun = true)
     public void tearDown(ITestResult result) {
         if (getDriver() != null && result.getStatus() == ITestResult.FAILURE) {
-            ScreenshotUtil.capture(getDriver(), result.getName());
+            attachScreenshot(getDriver());
         }
 
         if (getDriver() != null) {
             getDriver().quit();
             tlDriver.remove();
         }
+    }
+    @Attachment(value = "Screenshot khi test fail", type = "image/png")
+    public byte[] attachScreenshot(WebDriver driver) {
+        return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
     }
 }

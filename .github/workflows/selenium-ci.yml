@@ -1,16 +1,13 @@
-name: Selenium Test Suite
+name: Full Selenium CI Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
     branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  run-tests:
+  test:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         browser: [chrome, firefox]
@@ -27,16 +24,57 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run Selenium Tests (${{ matrix.browser }})
+      - name: Run tests
         run: mvn clean test -Dbrowser=${{ matrix.browser }} -Denv=dev -DsuiteXmlFile=src/test/resources/testng-smoke.xml
         env:
           APP_USERNAME: ${{ secrets.SAUCEDEMO_USERNAME }}
           APP_PASSWORD: ${{ secrets.SAUCEDEMO_PASSWORD }}
-      - name: Upload test results (${{ matrix.browser }})
+
+      - name: Upload Allure results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.browser }}
-          path: |
-            target/surefire-reports/
-            target/screenshots/
+          name: allure-results-${{ matrix.browser }}
+          path: target/allure-results
+
+  publish-report:
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Chrome Allure results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results-chrome
+          path: allure-results/chrome
+
+      - name: Download Firefox Allure results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results-firefox
+          path: allure-results/firefox
+
+      - name: Merge allure results
+        run: |
+          mkdir merged-allure-results
+          cp -r allure-results/chrome/* merged-allure-results/ || true
+          cp -r allure-results/firefox/* merged-allure-results/ || true
+        shell: bash
+
+      - name: Generate Allure report
+        uses: simple-elf/allure-report-action@master
+        with:
+          allure_results: merged-allure-results
+          allure_report: allure-report
+          gh_pages: gh-pages
+
+      - name: Deploy Allure report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-report
