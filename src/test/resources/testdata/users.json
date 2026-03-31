@@ -1,0 +1,37 @@
+[
+  {
+    "username": "standard_user",
+    "password": "secret_sauce",
+    "role": "user",
+    "expectSuccess": true,
+    "description": "JSON - user hợp lệ"
+  },
+  {
+    "username": "locked_out_user",
+    "password": "secret_sauce",
+    "role": "user",
+    "expectSuccess": false,
+    "description": "JSON - user bị khóa"
+  },
+  {
+    "username": "problem_user",
+    "password": "secret_sauce",
+    "role": "user",
+    "expectSuccess": true,
+    "description": "JSON - problem user"
+  },
+  {
+    "username": "standard_user",
+    "password": "wrongpass",
+    "role": "user",
+    "expectSuccess": false,
+    "description": "JSON - sai mật khẩu"
+  },
+  {
+    "username": "",
+    "password": "secret_sauce",
+    "role": "guest",
+    "expectSuccess": false,
+    "description": "JSON - rỗng username"
+  }
+]
